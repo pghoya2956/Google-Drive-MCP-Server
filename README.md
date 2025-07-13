@@ -194,7 +194,7 @@ npm test
 
 ## 라이센스
 
-이 프로젝트는 [이 저장소](https://github.com/modelcontextprotocol/servers/tree/main/src/gdrive)에서 MIT 라이센스로 배포된 Anthropic, PBC가 원래 개발한 코드를 포함합니다.
+이 프로젝트는 [이 저장소](https://github.com/modelcontextprotocol/servers-archived/tree/main/src/gdrive)에서 MIT 라이센스로 배포된 Anthropic, PBC가 원래 개발한 코드를 포함합니다.
 
 ## 기여
 
