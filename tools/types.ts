@@ -48,3 +48,25 @@ export interface GDriveListSharedDrivesInput {
   pageToken?: string;
 }
 
+export interface GDriveFolderStructureInput {
+  folderId?: string;
+  maxDepth?: number;
+  includeFiles?: boolean;
+  maxItems?: number;
+}
+
+export interface GDriveReadLargeFileInput {
+  fileId: string;
+  startByte?: number;
+  endByte?: number;
+  maxBytes?: number;
+  encoding?: string;
+}
+
+export interface GDriveAnalyzeImageInput {
+  fileId: string;
+  generateThumbnail?: boolean;
+  thumbnailSize?: number;
+  includeHistogram?: boolean;
+}
+
