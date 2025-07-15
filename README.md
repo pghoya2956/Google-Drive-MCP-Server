@@ -87,6 +87,11 @@ GDRIVE_CREDS_DIR=/path/to/credentials/directory
 GDRIVE_ROOT_FOLDER_ID=your-root-folder-id
 ```
 
+**환경 변수 역할:**
+- `CLIENT_ID`, `CLIENT_SECRET`: 토큰 갱신 시 사용 (gcp-oauth.keys.json의 값과 동일)
+- `GDRIVE_CREDS_DIR`: 인증 파일들이 저장되는 디렉토리 경로
+- `GDRIVE_ROOT_FOLDER_ID`: 접근을 제한할 루트 폴더 ID
+
 ### Google Cloud 시작하기
 
 1. **[새 Google Cloud 프로젝트 생성](https://console.cloud.google.com/projectcreate)**
@@ -109,8 +114,12 @@ GDRIVE_ROOT_FOLDER_ID=your-root-folder-id
 5. **자격 증명 설정:**
    - 다운로드한 키 파일의 이름을 `gcp-oauth.keys.json`으로 변경
    - `GDRIVE_CREDS_DIR` 디렉토리에 배치 (예: `/Users/username/.config/mcp-gdrive`)
+   - 이 파일은 최초 인증 시에만 사용되며, 브라우저 인증 흐름을 시작합니다
 
-6. **Google Cloud Console 자격 증명 페이지에서 OAuth 클라이언트 ID와 클라이언트 시크릿을 기록**
+6. **환경 변수 설정:**
+   - `gcp-oauth.keys.json`에서 client_id와 client_secret 값을 확인
+   - 이 값들을 환경 변수 `CLIENT_ID`, `CLIENT_SECRET`에 설정
+   - 토큰 자동 갱신에 필요합니다
 
 7. **루트 폴더 ID 찾기:**
    - 루트로 사용할 Google Drive 폴더 열기
@@ -143,12 +152,20 @@ MCP 클라이언트 구성에 이 서버를 추가합니다:
 
 ## 인증 흐름
 
-1. 첫 실행 시 Google 인증을 요청합니다
-2. OAuth 흐름을 완료하기 위해 브라우저가 열립니다
-3. 요청된 권한을 부여합니다
-4. 자격 증명이 `GDRIVE_CREDS_DIR/.gdrive-server-credentials.json`에 저장됩니다
-5. 이후 실행 시 저장된 자격 증명을 사용합니다
-6. 토큰은 필요 시 자동으로 갱신됩니다
+### 최초 인증
+1. `gcp-oauth.keys.json` 파일을 사용하여 브라우저 인증 시작
+2. Google 계정으로 로그인하고 권한 승인
+3. 인증 토큰이 `.gdrive-server-credentials.json`에 저장됨
+
+### 이후 실행
+1. 저장된 `.gdrive-server-credentials.json`에서 토큰 로드
+2. 토큰 만료 시 환경 변수 `CLIENT_ID`, `CLIENT_SECRET`을 사용하여 자동 갱신
+3. 45분마다 백그라운드에서 토큰 갱신 확인
+
+**인증 파일 역할:**
+- `gcp-oauth.keys.json`: 최초 인증용 (브라우저 인증 흐름)
+- `.gdrive-server-credentials.json`: 토큰 저장 (자동 생성)
+- `CLIENT_ID/CLIENT_SECRET` 환경 변수: 토큰 갱신용
 
 ## 사용 예시
 
