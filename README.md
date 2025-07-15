@@ -2,9 +2,15 @@
 
 지정된 폴더 범위 내에서 Google Drive 파일과 Google Sheets에 대한 안전하고 범위가 지정된 액세스를 제공하는 Model Context Protocol (MCP) 서버입니다. 이 서버를 통해 AI 어시스턴트가 Google Drive 콘텐츠와 상호작용할 수 있습니다.
 
-## 기능
+## 드라이브 접근 범위
 
-- **범위 지정 액세스**: `GDRIVE_ROOT_FOLDER_ID`를 사용하여 특정 Google Drive 폴더와 하위 폴더에 대한 액세스 제한
+이 서버는 내 드라이브와 공유 드라이브 모두 지원합니다. `GDRIVE_ROOT_FOLDER_ID`로 지정된 폴더와 그 하위 폴더에만 접근합니다.
+
+- **내 드라이브**: 특정 폴더 ID를 설정하면 해당 폴더 이하만 접근
+- **공유 드라이브**: 공유 드라이브 내 폴더 ID를 설정하면 해당 범위만 접근
+- **API 설정**: `supportsAllDrives: true`로 모든 드라이브 유형 지원
+
+## 기능
 - **파일 작업**: Google Docs, Sheets 및 일반 파일 읽기
 - **검색 기능**: 허용된 범위 내에서 파일 검색
 - **Sheets 통합**: Google Sheets 셀 읽기 및 업데이트
