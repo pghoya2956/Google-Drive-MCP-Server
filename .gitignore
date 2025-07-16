@@ -1,4 +1,38 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Environment files
 .env
-/dist
-/node_modules
-/requirements
+.env.local
+.env.*.local
+
+# Credentials
+.gdrive-server-credentials.json
+gcp-oauth.keys.json
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Temporary files
+tmp/
+temp/
+requirements/

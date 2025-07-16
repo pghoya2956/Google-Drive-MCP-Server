@@ -1,15 +1,15 @@
 {
-  "name": "@isaacphi/mcp-gdrive",
+  "name": "@pghoya2956/gdrive-mcp-server",
   "version": "0.2.0",
   "description": "MCP server for interacting with Google Drive and Sheets",
   "license": "MIT",
-  "author": "Phil Isaac",
-  "homepage": "https://github.com/isaacphi/mcp-gdrive",
-  "bugs": "https://github.com/isaacphi/mcp-gdrive/issues",
+  "author": "pghoya2956",
+  "homepage": "https://github.com/pghoya2956/gdrive-mcp-server",
+  "bugs": "https://github.com/pghoya2956/gdrive-mcp-server/issues",
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/isaacphi/mcp-gdrive.git"
+    "url": "git+https://github.com/pghoya2956/gdrive-mcp-server.git"
   },
   "keywords": [
     "Google Drive",
@@ -19,7 +19,7 @@
     "AI"
   ],
   "bin": {
-    "mcp-gdrive": "dist/index.js"
+    "gdrive-mcp-server": "dist/index.js"
   },
   "files": [
     "dist"

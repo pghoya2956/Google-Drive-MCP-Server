@@ -19,59 +19,28 @@
 
 ## 사용 가능한 도구
 
-### 1. `gdrive_search`
-허용된 폴더 범위 내에서 Google Drive의 파일을 검색합니다.
+### 파일 관리
+- **`gdrive_search`**: Google Drive 파일 검색 (`query`, `pageToken`, `pageSize`)
+- **`gdrive_read_file`**: 파일 내용 읽기 (`fileId`)
+- **`gdrive_read_large_file`**: 대용량 파일 읽기 (`fileId`, `startLine`, `endLine`)
+- **`gdrive_folder_structure`**: 폴더 구조 탐색 (`folderId`)
+- **`gdrive_analyze_image`**: 이미지 분석 (`fileId`, `prompt`)
 
-**매개변수:**
-- `query`: 검색 쿼리 문자열
-- `pageToken`: 페이지네이션을 위한 토큰 (선택사항)
-- `pageSize`: 페이지당 결과 수, 최대 100 (선택사항)
+### 스프레드시트
+- **`gsheets_read`**: 시트 데이터 읽기 (`spreadsheetId`, `ranges`, `sheetId`)
+- **`gsheets_update_cell`**: 셀 업데이트 (`fileId`, `range`, `value`)
 
-### 2. `gdrive_read_file`
-Google Drive에서 파일 내용을 읽습니다.
-
-**매개변수:**
-- `fileId`: 읽을 파일의 ID
-
-**지원되는 파일 유형:**
-- Google Docs (Markdown으로 내보내기)
-- Google Sheets (CSV로 내보내기)
-- Google Slides (일반 텍스트로 내보내기)
-- Google Drawings (PNG로 내보내기)
-- 일반 파일 (텍스트 및 바이너리)
-
-### 3. `gsheets_read`
-유연한 범위 옵션으로 Google 스프레드시트에서 데이터를 읽습니다.
-
-**매개변수:**
-- `spreadsheetId`: 스프레드시트의 ID
-- `ranges`: A1 표기법 범위의 배열 (선택사항)
-- `sheetId`: 읽을 특정 시트 ID (선택사항)
-
-### 4. `gsheets_update_cell`
-Google 스프레드시트의 셀 값을 업데이트합니다.
-
-**매개변수:**
-- `fileId`: 스프레드시트의 ID
-- `range`: A1 표기법의 셀 범위 (예: 'Sheet1!A1')
-- `value`: 새 셀 값
+### 지원 파일 유형
+- Google Docs → Markdown
+- Google Sheets → CSV
+- Google Slides → 텍스트
+- Google Drawings → PNG
+- 일반 파일 (텍스트/바이너리)
 
 ## 설치
 
-1. 이 저장소를 복제합니다:
 ```bash
-git clone https://github.com/yourusername/mcp-gdrive.git
-cd mcp-gdrive
-```
-
-2. 종속성을 설치합니다:
-```bash
-npm install
-```
-
-3. 프로젝트를 빌드합니다:
-```bash
-npm run build
+npm install @pghoya2956/gdrive-mcp-server
 ```
 
 ## 구성
@@ -113,7 +82,7 @@ GDRIVE_ROOT_FOLDER_ID=your-root-folder-id
 
 5. **자격 증명 설정:**
    - 다운로드한 키 파일의 이름을 `gcp-oauth.keys.json`으로 변경
-   - `GDRIVE_CREDS_DIR` 디렉토리에 배치 (예: `/Users/username/.config/mcp-gdrive`)
+   - `GDRIVE_CREDS_DIR` 디렉토리에 배치 (예: `/Users/username/.config/gdrive-mcp-server`)
    - 이 파일은 최초 인증 시에만 사용되며, 브라우저 인증 흐름을 시작합니다
 
 6. **환경 변수 설정:**
@@ -127,8 +96,6 @@ GDRIVE_ROOT_FOLDER_ID=your-root-folder-id
 
 ## MCP 클라이언트 구성
 
-MCP 클라이언트 구성에 이 서버를 추가합니다:
-
 ### Claude Desktop
 
 `claude_desktop_config.json`에 추가:
@@ -137,8 +104,8 @@ MCP 클라이언트 구성에 이 서버를 추가합니다:
 {
   "mcpServers": {
     "gdrive": {
-      "command": "node",
-      "args": ["/path/to/mcp-gdrive/dist/index.js"],
+      "command": "npx",
+      "args": ["@pghoya2956/gdrive-mcp-server"],
       "env": {
         "CLIENT_ID": "your-oauth-client-id",
         "CLIENT_SECRET": "your-oauth-client-secret",
@@ -152,20 +119,9 @@ MCP 클라이언트 구성에 이 서버를 추가합니다:
 
 ## 인증 흐름
 
-### 최초 인증
-1. `gcp-oauth.keys.json` 파일을 사용하여 브라우저 인증 시작
-2. Google 계정으로 로그인하고 권한 승인
-3. 인증 토큰이 `.gdrive-server-credentials.json`에 저장됨
-
-### 이후 실행
-1. 저장된 `.gdrive-server-credentials.json`에서 토큰 로드
-2. 토큰 만료 시 환경 변수 `CLIENT_ID`, `CLIENT_SECRET`을 사용하여 자동 갱신
-3. 45분마다 백그라운드에서 토큰 갱신 확인
-
-**인증 파일 역할:**
-- `gcp-oauth.keys.json`: 최초 인증용 (브라우저 인증 흐름)
-- `.gdrive-server-credentials.json`: 토큰 저장 (자동 생성)
-- `CLIENT_ID/CLIENT_SECRET` 환경 변수: 토큰 갱신용
+1. **최초 실행**: 브라우저가 열리며 Google 계정 인증
+2. **토큰 저장**: `.gdrive-server-credentials.json`에 자동 저장
+3. **자동 갱신**: 토큰 만료 시 자동으로 갱신
 
 ## 사용 예시
 
@@ -204,15 +160,20 @@ MCP 클라이언트 구성에 이 서버를 추가합니다:
 
 ## 개발
 
+### 소스에서 빌드
 ```bash
+# 저장소 복제
+git clone https://github.com/pghoya2956/gdrive-mcp-server.git
+cd gdrive-mcp-server
+
 # 종속성 설치
 npm install
 
 # TypeScript 빌드
 npm run build
 
-# 테스트 실행 (사용 가능한 경우)
-npm test
+# 개발 모드로 실행
+npm run watch
 ```
 
 ## 라이센스
