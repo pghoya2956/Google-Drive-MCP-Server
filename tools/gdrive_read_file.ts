@@ -1,5 +1,6 @@
 import { google } from "googleapis";
 import { GDriveReadFileInput, InternalToolResponse } from "./types.js";
+import pdf from "pdf-parse/lib/pdf-parse.js";
 
 export const schema = {
   name: "gdrive_read_file",
@@ -194,6 +195,29 @@ async function readGoogleDriveFile(
   const isText =
     mimeType.startsWith("text/") || mimeType === "application/json";
   const content = Buffer.from(res.data as ArrayBuffer);
+
+  // Handle PDF files specially
+  if (mimeType === "application/pdf") {
+    try {
+      const pdfData = await pdf(content);
+      return {
+        name: file.data.name || fileId,
+        contents: {
+          mimeType,
+          text: pdfData.text,
+        },
+      };
+    } catch (error) {
+      // If PDF parsing fails, return as blob
+      return {
+        name: file.data.name || fileId,
+        contents: {
+          mimeType,
+          blob: content.toString("base64"),
+        },
+      };
+    }
+  }
 
   return {
     name: file.data.name || fileId,

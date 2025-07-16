@@ -11,9 +11,10 @@
 - **API 설정**: `supportsAllDrives: true`로 모든 드라이브 유형 지원
 
 ## 기능
-- **파일 작업**: Google Docs, Sheets 및 일반 파일 읽기
+- **파일 작업**: Google Docs, Sheets, PDF 및 일반 파일 읽기
 - **검색 기능**: 허용된 범위 내에서 파일 검색
 - **Sheets 통합**: Google Sheets 셀 읽기 및 업데이트
+- **PDF 지원**: PDF 파일에서 텍스트 추출
 - **보안**: Google API를 사용한 OAuth2 인증
 - **오류 처리**: 지원되지 않는 파일 유형에 대한 우아한 처리
 
@@ -35,6 +36,7 @@
 - Google Sheets → CSV
 - Google Slides → 텍스트
 - Google Drawings → PNG
+- PDF 파일 → 텍스트 추출
 - 일반 파일 (텍스트/바이너리)
 
 ## 설치
