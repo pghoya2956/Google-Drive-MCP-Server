@@ -1,6 +1,6 @@
 import { google } from "googleapis";
 import { GDriveReadFileInput, InternalToolResponse } from "./types.js";
-import pdf from "pdf-parse";
+import pdf from "pdf-parse/lib/pdf-parse.js";
 import { pdfCache } from "./cache.js";
 import { PDFTableExtractor } from "./pdf-table-extractor.js";
 
