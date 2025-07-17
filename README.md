@@ -42,7 +42,7 @@
 ## 설치
 
 ```bash
-npm install @pghoya2956/Google-Drive-MCP-Server
+npm install @pghoya2956/google-drive-mcp-server
 ```
 
 ## 구성
