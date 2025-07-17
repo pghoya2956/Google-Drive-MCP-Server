@@ -1,15 +1,15 @@
 {
-  "name": "@pghoya2956/gdrive-mcp-server",
+  "name": "@pghoya2956/Google-Drive-MCP-Server",
   "version": "0.4.0",
   "description": "MCP server for interacting with Google Drive and Sheets, with PDF text extraction and metadata support",
   "license": "MIT",
   "author": "pghoya2956",
-  "homepage": "https://github.com/pghoya2956/gdrive-mcp-server",
-  "bugs": "https://github.com/pghoya2956/gdrive-mcp-server/issues",
+  "homepage": "https://github.com/pghoya2956/Google-Drive-MCP-Server",
+  "bugs": "https://github.com/pghoya2956/Google-Drive-MCP-Server/issues",
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/pghoya2956/gdrive-mcp-server.git"
+    "url": "git+https://github.com/pghoya2956/Google-Drive-MCP-Server.git"
   },
   "keywords": [
     "Google Drive",
