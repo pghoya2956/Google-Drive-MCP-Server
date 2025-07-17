@@ -1,6 +1,6 @@
 import { google } from "googleapis";
 import { GDriveReadFileInput, InternalToolResponse } from "./types.js";
-import pdf from "pdf-parse/lib/pdf-parse.js";
+import pdf from "pdf-parse";
 
 export const schema = {
   name: "gdrive_read_file",
@@ -103,6 +103,38 @@ export async function readFile(
   
   try {
     const result = await readGoogleDriveFile(args.fileId);
+    
+    // Special handling for PDF files with metadata
+    if (result.contents.mimeType === "application/pdf" && result.contents.text) {
+      try {
+        const pdfData = JSON.parse(result.contents.text);
+        let formattedText = `PDF 파일: ${result.name}\n\n`;
+        
+        // Add metadata section
+        formattedText += `📄 메타데이터:\n`;
+        formattedText += `- 페이지 수: ${pdfData.metadata.pages}\n`;
+        formattedText += `- 파일 크기: ${(pdfData.metadata.fileSize / (1024 * 1024)).toFixed(2)} MB\n`;
+        if (pdfData.metadata.title) formattedText += `- 제목: ${pdfData.metadata.title}\n`;
+        if (pdfData.metadata.author) formattedText += `- 작성자: ${pdfData.metadata.author}\n`;
+        if (pdfData.metadata.createdAt) formattedText += `- 생성일: ${pdfData.metadata.createdAt}\n`;
+        if (pdfData.metadata.modifiedAt) formattedText += `- 수정일: ${pdfData.metadata.modifiedAt}\n`;
+        
+        formattedText += `\n📝 텍스트 내용:\n\n${pdfData.text}`;
+        
+        return {
+          content: [
+            {
+              type: "text",
+              text: formattedText,
+            },
+          ],
+          isError: false,
+        };
+      } catch (e) {
+        // If JSON parsing fails, fall back to original text
+      }
+    }
+    
     return {
       content: [
         {
@@ -198,22 +230,69 @@ async function readGoogleDriveFile(
 
   // Handle PDF files specially
   if (mimeType === "application/pdf") {
+    // Check file size limit (20MB)
+    const fileSizeMB = content.length / (1024 * 1024);
+    if (fileSizeMB > 20) {
+      throw new Error(`PDF 파일이 20MB를 초과합니다 (실제: ${fileSizeMB.toFixed(1)} MB). 더 작은 파일을 사용해주세요.`);
+    }
     try {
       const pdfData = await pdf(content);
+      
+      // Check if it's a scanned document (no text extracted)
+      if (!pdfData.text || pdfData.text.trim().length === 0) {
+        throw new Error("이 PDF는 스캔된 이미지로 구성되어 있어 텍스트를 추출할 수 없습니다.");
+      }
+      
+      // Extract metadata
+      const metadata: any = {
+        pages: pdfData.numpages,
+        fileSize: content.length,
+      };
+      
+      // Add optional metadata fields if available
+      if (pdfData.info.Title) metadata.title = pdfData.info.Title;
+      if (pdfData.info.Author) metadata.author = pdfData.info.Author;
+      if (pdfData.info.CreationDate) metadata.createdAt = pdfData.info.CreationDate;
+      if (pdfData.info.ModDate) metadata.modifiedAt = pdfData.info.ModDate;
+      if (pdfData.info.Creator) metadata.creator = pdfData.info.Creator;
+      if (pdfData.info.Producer) metadata.producer = pdfData.info.Producer;
+      if (pdfData.info.Subject) metadata.subject = pdfData.info.Subject;
+      if (pdfData.info.Keywords) metadata.keywords = pdfData.info.Keywords;
+      
+      // Create structured response
+      const pdfResponse = {
+        text: pdfData.text,
+        metadata: metadata,
+        version: pdfData.version,
+      };
+      
       return {
         name: file.data.name || fileId,
         contents: {
           mimeType,
-          text: pdfData.text,
+          text: JSON.stringify(pdfResponse, null, 2),
         },
       };
     } catch (error) {
-      // If PDF parsing fails, return as blob
+      // If PDF parsing fails, provide detailed error messages
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      
+      // Determine specific error type and provide user-friendly message
+      let userMessage = "";
+      if (errorMessage.includes("encrypt") || errorMessage.includes("password")) {
+        userMessage = "이 PDF는 암호로 보호되어 있습니다.";
+      } else if (errorMessage.includes("scanned")) {
+        userMessage = errorMessage;
+      } else {
+        userMessage = `PDF 파싱 오류: ${errorMessage}`;
+      }
+      
       return {
         name: file.data.name || fileId,
         contents: {
           mimeType,
           blob: content.toString("base64"),
+          text: userMessage,
         },
       };
     }

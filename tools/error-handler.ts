@@ -8,6 +8,10 @@ export enum ErrorType {
   NETWORK_ERROR = "NETWORK_ERROR",
   INVALID_INPUT = "INVALID_INPUT",
   QUOTA_EXCEEDED = "QUOTA_EXCEEDED",
+  PDF_PARSE_ERROR = "PDF_PARSE_ERROR",
+  PDF_SIZE_LIMIT = "PDF_SIZE_LIMIT",
+  PDF_ENCRYPTED = "PDF_ENCRYPTED",
+  PDF_SCANNED = "PDF_SCANNED",
   UNKNOWN = "UNKNOWN"
 }
 
@@ -83,6 +87,43 @@ export function classifyError(error: any): ErrorDetails {
     };
   }
 
+  // PDF-specific errors
+  if (message.includes("PDF 파일이 20MB를 초과")) {
+    return {
+      type: ErrorType.PDF_SIZE_LIMIT,
+      message: message,
+      retryable: false,
+      statusCode
+    };
+  }
+
+  if (message.includes("암호로 보호되어")) {
+    return {
+      type: ErrorType.PDF_ENCRYPTED,
+      message: message,
+      retryable: false,
+      statusCode
+    };
+  }
+
+  if (message.includes("스캔된 이미지로 구성")) {
+    return {
+      type: ErrorType.PDF_SCANNED,
+      message: message,
+      retryable: false,
+      statusCode
+    };
+  }
+
+  if (message.includes("PDF 파싱 오류")) {
+    return {
+      type: ErrorType.PDF_PARSE_ERROR,
+      message: message,
+      retryable: false,
+      statusCode
+    };
+  }
+
   // Default
   return {
     type: ErrorType.UNKNOWN,
@@ -146,6 +187,18 @@ export function createErrorResponse(error: any, context?: string): InternalToolR
       break;
     case ErrorType.QUOTA_EXCEEDED:
       errorMessage += "\n\nSuggestion: Free up space in your Google Drive.";
+      break;
+    case ErrorType.PDF_SIZE_LIMIT:
+      errorMessage += "\n\n제안: PDF 파일을 압축하거나 분할하여 20MB 이하로 만들어주세요.";
+      break;
+    case ErrorType.PDF_ENCRYPTED:
+      errorMessage += "\n\n제안: PDF 파일의 비밀번호를 제거한 후 다시 시도해주세요.";
+      break;
+    case ErrorType.PDF_SCANNED:
+      errorMessage += "\n\n제안: OCR 기능을 사용해 텍스트를 추출한 PDF를 생성해주세요.";
+      break;
+    case ErrorType.PDF_PARSE_ERROR:
+      errorMessage += "\n\n제안: PDF 파일이 손상되었을 수 있습니다. 다시 다운로드하거나 다른 PDF 뷰어로 확인해주세요.";
       break;
   }
   

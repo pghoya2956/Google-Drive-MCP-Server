@@ -1,7 +1,7 @@
 {
   "name": "@pghoya2956/gdrive-mcp-server",
   "version": "0.3.0",
-  "description": "MCP server for interacting with Google Drive and Sheets",
+  "description": "MCP server for interacting with Google Drive and Sheets, with PDF text extraction and metadata support",
   "license": "MIT",
   "author": "pghoya2956",
   "homepage": "https://github.com/pghoya2956/gdrive-mcp-server",
@@ -16,7 +16,9 @@
     "Google Sheets",
     "MCP",
     "Model Context Protocol",
-    "AI"
+    "AI",
+    "PDF",
+    "text extraction"
   ],
   "bin": {
     "gdrive-mcp-server": "dist/index.js"

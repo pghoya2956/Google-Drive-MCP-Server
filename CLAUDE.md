@@ -50,9 +50,27 @@ npm install @pghoya2956/gdrive-mcp-server
 
 ## 주요 도구
 - `gdrive_search`: 파일 검색
-- `gdrive_read_file`: 파일 읽기
+- `gdrive_read_file`: 파일 읽기 (PDF 메타데이터 추출 기능 포함)
 - `gdrive_read_large_file`: 대용량 파일 읽기
 - `gdrive_folder_structure`: 폴더 구조 탐색
 - `gdrive_analyze_image`: 이미지 분석
 - `gsheets_read`: 스프레드시트 읽기
 - `gsheets_update_cell`: 셀 업데이트
+
+## PDF 파일 지원 (v0.3.0)
+
+### 기능
+- **텍스트 추출**: pdf-parse 라이브러리를 사용한 텍스트 추출
+- **메타데이터**: 페이지 수, 파일 크기, 제목, 작성자, 생성일 등
+- **구조화된 응답**: JSON 형식으로 텍스트와 메타데이터 분리 제공
+
+### 제한사항
+- 최대 20MB 파일 크기 제한 (Google Drive API 제약)
+- 암호화된 PDF 미지원
+- 스캔된 이미지 PDF 텍스트 추출 불가
+- OCR 기능 없음
+
+### 개선된 에러 처리
+- 파일 크기 초과 시 명확한 안내 메시지
+- 암호화/스캔 PDF에 대한 사용자 친화적 오류 메시지
+- 각 오류 유형에 대한 해결 방법 제안
