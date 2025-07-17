@@ -1,9 +1,9 @@
 # Google Drive MCP Server 프로젝트 정보
 
 ## 프로젝트 개요
-- **패키지명**: @pghoya2956/gdrive-mcp-server
-- **GitHub 저장소**: https://github.com/pghoya2956/gdrive-mcp-server
-- **npm**: https://www.npmjs.com/package/@pghoya2956/gdrive-mcp-server
+- **패키지명**: @pghoya2956/Google-Drive-MCP-Server
+- **GitHub 저장소**: https://github.com/pghoya2956/Google-Drive-MCP-Server
+- **npm**: https://www.npmjs.com/package/@pghoya2956/Google-Drive-MCP-Server
 - **설명**: Model Context Protocol (MCP)을 통해 Google Drive와 Google Sheets에 접근하는 서버
 - **작성자**: pghoya2956
 
@@ -42,10 +42,10 @@ graph TD
 ## 설치 방법
 ```bash
 # npm으로 설치
-npm install git+https://github.com/pghoya2956/gdrive-mcp-server.git
+npm install git+https://github.com/pghoya2956/Google-Drive-MCP-Server.git
 
 # 또는 npm 레지스트리에서 (퍼블리싱 후)
-npm install @pghoya2956/gdrive-mcp-server
+npm install @pghoya2956/Google-Drive-MCP-Server
 ```
 
 ## 주요 도구

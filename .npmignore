@@ -1,0 +1,38 @@
+# Source files
+*.ts
+!*.d.ts
+
+# Configuration
+tsconfig.json
+.env
+.env.local
+
+# Authentication files
+gcp-oauth.keys.json
+.gdrive-server-credentials.json
+
+# Development
+node_modules/
+*.log
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Test files
+test/
+*.test.*
+
+# Documentation source
+docs/
+
+# Requirements folder
+requirements/
+
+# Git
+.git/
+.gitignore
+
+# Build artifacts that shouldn't be published
+*.tsbuildinfo

@@ -42,7 +42,7 @@
 ## 설치
 
 ```bash
-npm install @pghoya2956/gdrive-mcp-server
+npm install @pghoya2956/Google-Drive-MCP-Server
 ```
 
 ## 구성
@@ -225,7 +225,7 @@ GDRIVE_ROOT_FOLDER_ID=your-root-folder-id
 ### 소스에서 빌드
 ```bash
 # 저장소 복제
-git clone https://github.com/pghoya2956/gdrive-mcp-server.git
+git clone https://github.com/pghoya2956/Google-Drive-MCP-Server.git
 cd gdrive-mcp-server
 
 # 종속성 설치
