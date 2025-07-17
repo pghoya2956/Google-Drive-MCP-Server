@@ -16,6 +16,7 @@ import {
 } from "./auth.js";
 import { tools } from "./tools/index.js";
 import { InternalToolResponse } from "./tools/types.js";
+import { pdfCache } from "./tools/cache.js";
 
 const drive = google.drive("v3");
 
@@ -292,6 +293,16 @@ async function startServer() {
 
     // Set up periodic token refresh that never prompts for auth
     setupTokenRefresh();
+    
+    // Set up periodic cache cleanup (every 10 minutes)
+    setInterval(() => {
+      pdfCache.cleanup();
+      const stats = pdfCache.getStats();
+      console.error(`PDF Cache stats - Size: ${(stats.size / 1024 / 1024).toFixed(2)} MB, Items: ${stats.count}`);
+    }, 10 * 60 * 1000); // 10 minutes
+    
+    // Log initial cache stats
+    console.error("PDF Cache initialized with 100MB limit and 30 minutes TTL");
   } catch (error) {
     console.error("Error starting server:", error);
     process.exit(1);

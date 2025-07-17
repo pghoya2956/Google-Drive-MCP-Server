@@ -1,6 +1,8 @@
 import { google } from "googleapis";
 import { GDriveReadFileInput, InternalToolResponse } from "./types.js";
 import pdf from "pdf-parse";
+import { pdfCache } from "./cache.js";
+import { PDFTableExtractor } from "./pdf-table-extractor.js";
 
 export const schema = {
   name: "gdrive_read_file",
@@ -119,6 +121,17 @@ export async function readFile(
         if (pdfData.metadata.createdAt) formattedText += `- 생성일: ${pdfData.metadata.createdAt}\n`;
         if (pdfData.metadata.modifiedAt) formattedText += `- 수정일: ${pdfData.metadata.modifiedAt}\n`;
         
+        // Add tables section if available
+        if (pdfData.tables && pdfData.tables.length > 0) {
+          formattedText += `\n📋 추출된 테이블 (${pdfData.tables.length}개):\n\n`;
+          
+          for (const table of pdfData.tables) {
+            formattedText += `[테이블 ${table.index}]\n`;
+            formattedText += table.markdown;
+            formattedText += `\n`;
+          }
+        }
+        
         formattedText += `\n📝 텍스트 내용:\n\n${pdfData.text}`;
         
         return {
@@ -163,7 +176,7 @@ async function readGoogleDriveFile(
   // First get file metadata to check mime type
   const file = await drive.files.get({
     fileId,
-    fields: "mimeType,name",
+    fields: "mimeType,name,modifiedTime,size",
     supportsAllDrives: true,
   });
 
@@ -218,18 +231,33 @@ async function readGoogleDriveFile(
     };
   }
 
-  // For regular files download content
-  const res = await drive.files.get(
-    { fileId, alt: "media", supportsAllDrives: true },
-    { responseType: "arraybuffer" },
-  );
   const mimeType = file.data.mimeType || "application/octet-stream";
-  const isText =
-    mimeType.startsWith("text/") || mimeType === "application/json";
-  const content = Buffer.from(res.data as ArrayBuffer);
-
-  // Handle PDF files specially
+  
+  // Handle PDF files specially with caching
   if (mimeType === "application/pdf") {
+    // Generate cache key using fileId and modifiedTime
+    const cacheKey = `pdf_${fileId}_${file.data.modifiedTime || 'unknown'}`;
+    
+    // Check cache first
+    const cachedResult = pdfCache.get(cacheKey);
+    if (cachedResult) {
+      console.log(`Cache hit for PDF file: ${fileId}`);
+      return {
+        name: file.data.name || fileId,
+        contents: {
+          mimeType,
+          text: JSON.stringify(cachedResult, null, 2),
+        },
+      };
+    }
+    
+    // Cache miss - download and process the file
+    console.log(`Cache miss for PDF file: ${fileId}`);
+    const res = await drive.files.get(
+      { fileId, alt: "media", supportsAllDrives: true },
+      { responseType: "arraybuffer" },
+    );
+    const content = Buffer.from(res.data as ArrayBuffer);
     // Check file size limit (20MB)
     const fileSizeMB = content.length / (1024 * 1024);
     if (fileSizeMB > 20) {
@@ -259,12 +287,37 @@ async function readGoogleDriveFile(
       if (pdfData.info.Subject) metadata.subject = pdfData.info.Subject;
       if (pdfData.info.Keywords) metadata.keywords = pdfData.info.Keywords;
       
+      // Try to extract tables
+      let tables: any[] = [];
+      try {
+        const tableExtractor = new PDFTableExtractor();
+        const extractedTables = await tableExtractor.extractTablesFromBuffer(content);
+        
+        if (extractedTables.length > 0) {
+          tables = extractedTables.map((table, index) => ({
+            index: index + 1,
+            headers: table.headers,
+            rows: table.rows,
+            markdown: PDFTableExtractor.tableToMarkdown(table),
+            json: PDFTableExtractor.tableToJson(table)
+          }));
+          console.log(`Extracted ${tables.length} table(s) from PDF`);
+        }
+      } catch (tableError) {
+        console.log('Table extraction failed, continuing with text only:', tableError);
+      }
+      
       // Create structured response
       const pdfResponse = {
         text: pdfData.text,
         metadata: metadata,
         version: pdfData.version,
+        tables: tables
       };
+      
+      // Store in cache
+      pdfCache.set(cacheKey, pdfResponse, content.length);
+      console.log(`Cached PDF file: ${fileId} (${(content.length / 1024 / 1024).toFixed(2)} MB)`);
       
       return {
         name: file.data.name || fileId,
@@ -297,6 +350,15 @@ async function readGoogleDriveFile(
       };
     }
   }
+
+  // For non-PDF regular files, download content
+  const res = await drive.files.get(
+    { fileId, alt: "media", supportsAllDrives: true },
+    { responseType: "arraybuffer" },
+  );
+  const content = Buffer.from(res.data as ArrayBuffer);
+  const isText =
+    mimeType.startsWith("text/") || mimeType === "application/json";
 
   return {
     name: file.data.name || fileId,
