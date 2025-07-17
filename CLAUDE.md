@@ -114,3 +114,21 @@ npm install @pghoya2956/google-drive-mcp-server
 ### 구현 파일
 - `tools/pdf-table-extractor.ts`: 테이블 추출 클래스
 - `types/pdf.js-extract.d.ts`: 타입 정의
+
+## PDF 크기 제한 환경변수 (v0.4.3)
+
+### 기능
+- **환경변수 설정**: `PDF_SIZE_LIMIT_MB`로 PDF 크기 제한 조정 가능
+- **기본값**: 20MB
+- **최대값**: 100MB
+- **대용량 PDF 대안**: 크기 초과 시 구체적인 대안 제시
+
+### 향상된 에러 처리
+- 크기 초과 시 3가지 대안 제시
+- `gdrive_read_large_file` 사용법 예시 포함
+- 환경변수 제안값 자동 계산
+
+### 구현 세부사항
+- `index.ts`: 환경변수 검증 및 전역 설정
+- `tools/gdrive_read_file.ts`: 향상된 에러 메시지
+- `tools/error-handler.ts`: 동적 크기 제한 메시지

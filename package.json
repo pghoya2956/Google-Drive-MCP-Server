@@ -1,6 +1,6 @@
 {
   "name": "@pghoya2956/google-drive-mcp-server",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "MCP server for interacting with Google Drive and Sheets, with PDF text extraction and metadata support",
   "license": "MIT",
   "author": "pghoya2956",
