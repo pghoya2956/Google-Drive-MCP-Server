@@ -262,7 +262,21 @@ async function readGoogleDriveFile(
     // Check file size limit
     const fileSizeMB = content.length / (1024 * 1024);
     if (fileSizeMB > pdfSizeLimitMB) {
-      throw new Error(`PDF 파일이 ${pdfSizeLimitMB}MB를 초과합니다 (실제: ${fileSizeMB.toFixed(1)} MB). 더 작은 파일을 사용해주세요.`);
+      const fileName = file.data.name || fileId;
+      console.error(`Large PDF detected: ${fileName} (${fileSizeMB.toFixed(1)}MB) exceeds limit (${pdfSizeLimitMB}MB)`);
+      
+      const suggestedLimit = Math.min(Math.ceil(fileSizeMB / 10) * 10, 100);
+      throw new Error(`PDF 파일이 ${pdfSizeLimitMB}MB를 초과합니다 (실제: ${fileSizeMB.toFixed(1)} MB).
+
+대안:
+1. 환경변수로 제한 늘리기:
+   PDF_SIZE_LIMIT_MB=${suggestedLimit}
+
+2. 부분 읽기 (텍스트 추출 불가):
+   gdrive_read_large_file 사용
+   예: { "fileId": "${fileId}", "maxBytes": 10485760 }
+
+3. PDF 파일 압축 또는 분할 권장`);
     }
     try {
       const pdfData = await pdf(content);

@@ -183,6 +183,49 @@ PDF_SIZE_LIMIT_MB=20
 }
 ```
 
+## 대용량 PDF 처리
+
+### PDF 크기 제한
+- 기본 제한: 20MB (환경변수 `PDF_SIZE_LIMIT_MB`로 조정 가능)
+- 최대 제한: 100MB (메모리 제약)
+
+### 크기별 처리 방법
+
+#### 20MB 이하 (기본)
+```bash
+# gdrive_read_file 사용 - 완전한 PDF 파싱
+# 텍스트, 테이블, 메타데이터 추출 가능
+```
+
+#### 20-100MB
+```bash
+# 환경변수 설정 후 gdrive_read_file 사용
+PDF_SIZE_LIMIT_MB=50 npm start
+```
+
+#### 100MB 초과
+```bash
+# gdrive_read_large_file로 부분 읽기
+# 주의: PDF 파싱 없음, 원본 내용만 반환
+{
+  "tool": "gdrive_read_large_file",
+  "arguments": {
+    "fileId": "your-file-id",
+    "maxBytes": 10485760,  # 10MB씩 읽기
+    "startByte": 0
+  }
+}
+```
+
+### 도구별 특징 비교
+| 기능 | gdrive_read_file | gdrive_read_large_file |
+|------|------------------|------------------------|
+| PDF 텍스트 추출 | ✅ | ❌ |
+| 테이블 추출 | ✅ | ❌ |
+| 메타데이터 | ✅ | ❌ |
+| 크기 제한 | PDF_SIZE_LIMIT_MB | 없음 (부분 읽기) |
+| 캐싱 | ✅ | ❌ |
+
 ## 보안 고려사항
 
 - 서버는 지정된 루트 폴더와 하위 폴더 내의 파일에만 액세스할 수 있습니다
