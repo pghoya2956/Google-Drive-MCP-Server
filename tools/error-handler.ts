@@ -1,4 +1,5 @@
 import { InternalToolResponse } from "./types.js";
+import { pdfSizeLimitMB } from "../index.js";
 
 export enum ErrorType {
   AUTH_ERROR = "AUTH_ERROR",
@@ -88,7 +89,7 @@ export function classifyError(error: any): ErrorDetails {
   }
 
   // PDF-specific errors
-  if (message.includes("PDF 파일이 20MB를 초과")) {
+  if (/PDF 파일이 \d+MB를 초과/.test(message)) {
     return {
       type: ErrorType.PDF_SIZE_LIMIT,
       message: message,
@@ -189,7 +190,7 @@ export function createErrorResponse(error: any, context?: string): InternalToolR
       errorMessage += "\n\nSuggestion: Free up space in your Google Drive.";
       break;
     case ErrorType.PDF_SIZE_LIMIT:
-      errorMessage += "\n\n제안: PDF 파일을 압축하거나 분할하여 20MB 이하로 만들어주세요.";
+      errorMessage += `\n\n제안: PDF 파일을 압축하거나 분할하여 ${pdfSizeLimitMB}MB 이하로 만들어주세요.`;
       break;
     case ErrorType.PDF_ENCRYPTED:
       errorMessage += "\n\n제안: PDF 파일의 비밀번호를 제거한 후 다시 시도해주세요.";

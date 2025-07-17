@@ -3,6 +3,7 @@ import { GDriveReadFileInput, InternalToolResponse } from "./types.js";
 import pdf from "pdf-parse/lib/pdf-parse.js";
 import { pdfCache } from "./cache.js";
 import { PDFTableExtractor } from "./pdf-table-extractor.js";
+import { pdfSizeLimitMB } from "../index.js";
 
 export const schema = {
   name: "gdrive_read_file",
@@ -258,10 +259,10 @@ async function readGoogleDriveFile(
       { responseType: "arraybuffer" },
     );
     const content = Buffer.from(res.data as ArrayBuffer);
-    // Check file size limit (20MB)
+    // Check file size limit
     const fileSizeMB = content.length / (1024 * 1024);
-    if (fileSizeMB > 20) {
-      throw new Error(`PDF 파일이 20MB를 초과합니다 (실제: ${fileSizeMB.toFixed(1)} MB). 더 작은 파일을 사용해주세요.`);
+    if (fileSizeMB > pdfSizeLimitMB) {
+      throw new Error(`PDF 파일이 ${pdfSizeLimitMB}MB를 초과합니다 (실제: ${fileSizeMB.toFixed(1)} MB). 더 작은 파일을 사용해주세요.`);
     }
     try {
       const pdfData = await pdf(content);

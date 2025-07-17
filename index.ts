@@ -23,6 +23,9 @@ const drive = google.drive("v3");
 // Global variable to store allowed folder IDs
 let allowedFolderIds: Set<string> | null = null;
 
+// Global variable for PDF size limit
+export let pdfSizeLimitMB: number = 20; // default value
+
 // Helper function to get all subfolder IDs recursively with depth limit
 async function getAllSubfolderIds(rootFolderId: string, maxDepth: number = 3): Promise<Set<string>> {
   const folderIds = new Set<string>([rootFolderId]);
@@ -284,6 +287,21 @@ async function startServer() {
     }
     
     console.error("Starting server with GDRIVE_ROOT_FOLDER_ID:", process.env.GDRIVE_ROOT_FOLDER_ID);
+    
+    // PDF size limit configuration
+    const pdfSizeLimitStr = process.env.PDF_SIZE_LIMIT_MB;
+    if (pdfSizeLimitStr) {
+      const parsed = parseInt(pdfSizeLimitStr, 10);
+      if (isNaN(parsed) || parsed <= 0) {
+        console.error(`Invalid PDF_SIZE_LIMIT_MB value: "${pdfSizeLimitStr}". Using default 20MB.`);
+      } else if (parsed > 100) {
+        console.error(`PDF_SIZE_LIMIT_MB value ${parsed} exceeds maximum of 100MB. Using 100MB.`);
+        pdfSizeLimitMB = 100;
+      } else {
+        pdfSizeLimitMB = parsed;
+      }
+    }
+    console.error(`PDF size limit configured: ${pdfSizeLimitMB}MB`);
     
     // Add this line to force authentication at startup
     await ensureAuth(); // This will trigger the auth flow if no valid credentials exist

@@ -56,12 +56,14 @@ CLIENT_ID=your-oauth-client-id
 CLIENT_SECRET=your-oauth-client-secret
 GDRIVE_CREDS_DIR=/path/to/credentials/directory
 GDRIVE_ROOT_FOLDER_ID=your-root-folder-id
+PDF_SIZE_LIMIT_MB=20
 ```
 
 **환경 변수 역할:**
 - `CLIENT_ID`, `CLIENT_SECRET`: 토큰 갱신 시 사용 (gcp-oauth.keys.json의 값과 동일)
 - `GDRIVE_CREDS_DIR`: 인증 파일들이 저장되는 디렉토리 경로
 - `GDRIVE_ROOT_FOLDER_ID`: 접근을 제한할 루트 폴더 ID
+- `PDF_SIZE_LIMIT_MB`: PDF 파일 크기 제한 (기본값: 20, 최대: 100) - 선택사항
 
 ### Google Cloud 시작하기
 
@@ -112,7 +114,8 @@ GDRIVE_ROOT_FOLDER_ID=your-root-folder-id
         "CLIENT_ID": "your-oauth-client-id",
         "CLIENT_SECRET": "your-oauth-client-secret",
         "GDRIVE_CREDS_DIR": "/path/to/credentials/directory",
-        "GDRIVE_ROOT_FOLDER_ID": "your-root-folder-id"
+        "GDRIVE_ROOT_FOLDER_ID": "your-root-folder-id",
+        "PDF_SIZE_LIMIT_MB": "20"
       }
     }
   }

@@ -65,7 +65,7 @@ npm install @pghoya2956/google-drive-mcp-server
 - **구조화된 응답**: JSON 형식으로 텍스트와 메타데이터 분리 제공
 
 ### 제한사항
-- 최대 20MB 파일 크기 제한 (Google Drive API 제약)
+- 파일 크기 제한: 기본 20MB (환경 변수 `PDF_SIZE_LIMIT_MB`로 최대 100MB까지 조정 가능)
 - 암호화된 PDF 미지원
 - 스캔된 이미지 PDF 텍스트 추출 불가
 - OCR 기능 없음
