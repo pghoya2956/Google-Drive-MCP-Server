@@ -11,10 +11,11 @@
 - **API 설정**: `supportsAllDrives: true`로 모든 드라이브 유형 지원
 
 ## 기능
-- **파일 작업**: Google Docs, Sheets, PDF 및 일반 파일 읽기
+- **파일 작업**: Google Docs, Sheets, PDF, Excel 및 일반 파일 읽기
 - **검색 기능**: 허용된 범위 내에서 파일 검색
 - **Sheets 통합**: Google Sheets 셀 읽기 및 업데이트
 - **PDF 지원**: PDF 파일에서 텍스트 추출 및 메타데이터 분석 (캐싱 지원)
+- **Excel 지원**: Excel 파일(.xlsx) 읽기 및 구조화된 데이터 추출 (캐싱 지원)
 - **보안**: Google API를 사용한 OAuth2 인증
 - **오류 처리**: 지원되지 않는 파일 유형에 대한 우아한 처리
 
@@ -37,6 +38,7 @@
 - Google Slides → 텍스트
 - Google Drawings → PNG
 - PDF 파일 → 텍스트 추출 (메타데이터 포함)
+- Excel 파일 (.xlsx) → 구조화된 JSON 데이터
 - 일반 파일 (텍스트/바이너리)
 
 ## 설치
@@ -226,6 +228,55 @@ PDF_SIZE_LIMIT_MB=50 npm start
 | 크기 제한 | PDF_SIZE_LIMIT_MB | 없음 (부분 읽기) |
 | 캐싱 | ✅ | ❌ |
 
+## Excel 파일 처리
+
+### Excel 파일 지원
+- **지원 형식**: .xlsx (Office 2007 이상)
+- **구조화된 데이터**: 각 시트별로 헤더와 데이터를 JSON 형식으로 추출
+- **다중 시트**: 모든 시트의 데이터를 한 번에 읽기
+- **캐싱**: PDF와 동일한 캐싱 시스템 사용
+
+### Excel 읽기 응답 형식
+```json
+{
+  "sheetNames": ["Sheet1", "Sheet2"],
+  "sheets": {
+    "Sheet1": {
+      "range": "A1:D10",
+      "rowCount": 10,
+      "columnCount": 4,
+      "headers": ["Name", "Age", "Email", "City"],
+      "data": [
+        {
+          "Name": "John Doe",
+          "Age": 30,
+          "Email": "john@example.com",
+          "City": "New York"
+        }
+      ],
+      "rawData": [
+        ["Name", "Age", "Email", "City"],
+        ["John Doe", 30, "john@example.com", "New York"]
+      ],
+      "csv": "Name,Age,Email,City\nJohn Doe,30,john@example.com,New York"
+    }
+  },
+  "metadata": {
+    "fileSize": 1048576,
+    "sheetCount": 2
+  }
+}
+```
+
+### Excel vs Google Sheets
+| 기능 | Excel 파일 (.xlsx) | Google Sheets |
+|------|-------------------|---------------|
+| 도구 이름 | gdrive_read_file | gsheets_read |
+| 데이터 수정 | ❌ | ✅ |
+| 특정 범위 읽기 | ❌ (전체 시트) | ✅ |
+| 수식 결과 | ✅ | ✅ |
+| 캐싱 | ✅ | ❌ |
+
 ## 보안 고려사항
 
 - 서버는 지정된 루트 폴더와 하위 폴더 내의 파일에만 액세스할 수 있습니다
@@ -265,6 +316,21 @@ PDF_SIZE_LIMIT_MB=50 npm start
 3. **"이 PDF는 스캔된 이미지로 구성되어 있어 텍스트를 추출할 수 없습니다"**
    - OCR 기능을 사용해 텍스트를 추출한 PDF를 생성하세요
    - 현재 OCR 기능은 지원하지 않습니다
+
+### Excel 관련 문제
+
+1. **"Excel 파일이 20MB를 초과합니다"**
+   - Excel 파일을 압축하거나 불필요한 시트를 제거하세요
+   - 환경변수 `PDF_SIZE_LIMIT_MB`로 제한을 늘릴 수 있습니다
+
+2. **"Excel 파싱 오류"**
+   - .xlsx 형식으로 저장되었는지 확인하세요
+   - 파일이 손상되지 않았는지 확인하세요
+   - .xls (구버전) 형식은 지원하지 않습니다
+
+3. **"gsheets_read가 Excel 파일에서 작동하지 않습니다"**
+   - gsheets_read는 Google Sheets 전용입니다
+   - Excel 파일은 gdrive_read_file을 사용하세요
 
 ## 개발
 

@@ -4,7 +4,7 @@ import { Readable } from "stream";
 
 export const schema = {
   name: "gdrive_read_large_file",
-  description: "Read large files from Google Drive with streaming support",
+  description: "Read large files (>20MB) from Google Drive with streaming support, or read specific byte ranges from any file. Use this for partial file reading or when gdrive_read_file fails due to size limits. Not suitable for Google Docs/Sheets or files requiring text extraction.",
   inputSchema: {
     type: "object",
     properties: {
@@ -24,7 +24,7 @@ export const schema = {
       },
       maxBytes: {
         type: "number",
-        description: "Maximum bytes to read (default: 10MB)",
+        description: "Maximum bytes to read (default: 10MB). Use this to read files in chunks when dealing with very large files.",
         optional: true,
       },
       encoding: {

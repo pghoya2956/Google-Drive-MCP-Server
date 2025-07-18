@@ -1,7 +1,7 @@
 {
   "name": "@pghoya2956/google-drive-mcp-server",
-  "version": "0.4.3",
-  "description": "MCP server for interacting with Google Drive and Sheets, with PDF text extraction and metadata support",
+  "version": "0.5.2",
+  "description": "MCP server for interacting with Google Drive and Sheets, with PDF text extraction and Excel file reading support",
   "license": "MIT",
   "author": "pghoya2956",
   "homepage": "https://github.com/pghoya2956/Google-Drive-MCP-Server",
@@ -18,7 +18,9 @@
     "Model Context Protocol",
     "AI",
     "PDF",
-    "text extraction"
+    "text extraction",
+    "Excel",
+    "XLSX"
   ],
   "bin": {
     "gdrive-mcp-server": "dist/index.js"
@@ -37,7 +39,8 @@
     "dotenv": "^16.5.0",
     "googleapis": "^144.0.0",
     "pdf-parse": "^1.1.1",
-    "pdf.js-extract": "^0.2.1"
+    "pdf.js-extract": "^0.2.1",
+    "xlsx": "^0.18.5"
   },
   "publishConfig": {
     "access": "public"

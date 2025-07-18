@@ -4,13 +4,13 @@ import { GSheetsReadInput, InternalToolResponse } from "./types.js";
 export const schema = {
   name: "gsheets_read",
   description:
-    "Read data from a Google Spreadsheet with flexible options for ranges and formatting",
+    "Read data from Google Sheets (native Google Sheets only, not Excel/CSV files uploaded to Drive). For Excel files (.xlsx), use gdrive_read_file instead. Supports flexible range selection and formatting options.",
   inputSchema: {
     type: "object",
     properties: {
       spreadsheetId: {
         type: "string",
-        description: "The ID of the spreadsheet to read",
+        description: "The ID of the Google Sheets spreadsheet (not Excel file ID). Must be a native Google Sheets document.",
       },
       ranges: {
         type: "array",

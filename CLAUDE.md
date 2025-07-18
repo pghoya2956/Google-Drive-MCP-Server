@@ -50,11 +50,11 @@ npm install @pghoya2956/google-drive-mcp-server
 
 ## 주요 도구
 - `gdrive_search`: 파일 검색
-- `gdrive_read_file`: 파일 읽기 (PDF 메타데이터 추출 기능 포함)
+- `gdrive_read_file`: 파일 읽기 (PDF 메타데이터 추출 및 Excel 파일 지원)
 - `gdrive_read_large_file`: 대용량 파일 읽기
 - `gdrive_folder_structure`: 폴더 구조 탐색
 - `gdrive_analyze_image`: 이미지 분석
-- `gsheets_read`: 스프레드시트 읽기
+- `gsheets_read`: Google Sheets 읽기 (Excel 파일은 미지원)
 - `gsheets_update_cell`: 셀 업데이트
 
 ## PDF 파일 지원 (v0.3.0)
@@ -132,3 +132,86 @@ npm install @pghoya2956/google-drive-mcp-server
 - `index.ts`: 환경변수 검증 및 전역 설정
 - `tools/gdrive_read_file.ts`: 향상된 에러 메시지
 - `tools/error-handler.ts`: 동적 크기 제한 메시지
+
+## Excel 파일 지원 (v0.5.0)
+
+### 기능
+- **Excel 파일 읽기**: Google Drive에 업로드된 .xlsx 파일 읽기
+- **구조화된 데이터**: 각 시트별 헤더와 데이터를 JSON 형식으로 추출
+- **다중 시트**: 모든 시트의 데이터를 한 번에 읽기
+- **수식 계산**: 수식 결과값 포함 (원본 수식이 아닌 계산된 값)
+
+### 지원 형식
+- `.xlsx` (Excel 2007 이상)
+- `.xls` 형식은 미지원
+
+### 캐싱
+- PDF와 동일한 LRU 캐시 시스템 사용
+- 캐시 키: `excel_${fileId}_${modifiedTime}`
+- 동일한 환경변수 `PDF_SIZE_LIMIT_MB` 적용
+
+### 응답 구조
+```json
+{
+  "sheetNames": ["Sheet1", "Sheet2"],
+  "sheets": {
+    "Sheet1": {
+      "range": "A1:D10",
+      "rowCount": 10,
+      "columnCount": 4,
+      "headers": ["Name", "Age", "Email", "City"],
+      "data": [
+        {
+          "Name": "John Doe",
+          "Age": 30,
+          "Email": "john@example.com",
+          "City": "New York"
+        }
+      ],
+      "rawData": [["Name", "Age", "Email", "City"], ["John Doe", 30, ...]],
+      "csv": "Name,Age,Email,City\nJohn Doe,30,..."
+    }
+  },
+  "metadata": {
+    "fileSize": 1048576,
+    "sheetCount": 2
+  }
+}
+```
+
+### 구현 파일
+- `tools/gdrive_read_file.ts`: Excel 파일 처리 로직
+- `tools/error-handler.ts`: Excel 관련 에러 타입
+- **의존성**: `xlsx` (SheetJS) 라이브러리
+
+### Excel vs Google Sheets
+- **Google Sheets**: `gsheets_read` 도구 사용, 셀 수정 가능
+- **Excel 파일**: `gdrive_read_file` 도구 사용, 읽기 전용
+- **공통점**: 수식 계산 결과 제공
+- **차이점**: Excel은 전체 데이터만 읽기 가능, Sheets는 특정 범위 지정 가능
+
+### v0.5.1 개선사항
+- **파일 확장자 우선 확인**: .xlsx 확장자를 MIME 타입보다 우선적으로 확인
+- **다양한 MIME 타입 지원**: 
+  - `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`
+  - `application/vnd.ms-excel`
+  - `application/octet-stream` (확장자가 .xlsx인 경우)
+- **디버깅 정보 포함**: 파일 처리 시 MIME 타입과 처리 방식 표시
+- **향상된 에러 메시지**: 문제 발생 시 구체적인 진단 정보 제공
+
+## 도구 설명 개선 (v0.5.2)
+
+### 개선된 도구 설명
+1. **gsheets_read**: Google Sheets 전용임을 명시, Excel 파일은 gdrive_read_file 사용 안내
+2. **gdrive_read_file**: 지원 파일 형식(PDF, Excel) 및 크기 제한(20MB) 명시
+3. **gdrive_read_large_file**: 대용량 파일(>20MB) 및 부분 읽기용임을 명시
+
+### 향상된 에러 메시지
+- **크기 초과**: 구체적인 파일 크기와 대안 도구 사용법 제시
+- **파일 형식별 안내**: Excel, PDF, Google Sheets 각각에 맞는 해결책 제공
+- **다음 단계 제안**: 문제 원인에 따른 적절한 대안 제시
+
+### 문제 해결
+- Excel 파일에 대해 gsheets_read 시도 방지
+- 작은 파일에 대한 불필요한 large file reader 제안 방지
+- 도구 간 명확한 역할 구분으로 중복 시도 제거

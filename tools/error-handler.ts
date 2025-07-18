@@ -13,6 +13,8 @@ export enum ErrorType {
   PDF_SIZE_LIMIT = "PDF_SIZE_LIMIT",
   PDF_ENCRYPTED = "PDF_ENCRYPTED",
   PDF_SCANNED = "PDF_SCANNED",
+  EXCEL_PARSE_ERROR = "EXCEL_PARSE_ERROR",
+  EXCEL_SIZE_LIMIT = "EXCEL_SIZE_LIMIT",
   UNKNOWN = "UNKNOWN"
 }
 
@@ -125,6 +127,25 @@ export function classifyError(error: any): ErrorDetails {
     };
   }
 
+  // Excel-specific errors
+  if (/Excel 파일이 \d+MB를 초과/.test(message)) {
+    return {
+      type: ErrorType.EXCEL_SIZE_LIMIT,
+      message: message,
+      retryable: false,
+      statusCode
+    };
+  }
+
+  if (message.includes("Excel 파싱 오류")) {
+    return {
+      type: ErrorType.EXCEL_PARSE_ERROR,
+      message: message,
+      retryable: false,
+      statusCode
+    };
+  }
+
   // Default
   return {
     type: ErrorType.UNKNOWN,
@@ -200,6 +221,12 @@ export function createErrorResponse(error: any, context?: string): InternalToolR
       break;
     case ErrorType.PDF_PARSE_ERROR:
       errorMessage += "\n\n제안: PDF 파일이 손상되었을 수 있습니다. 다시 다운로드하거나 다른 PDF 뷰어로 확인해주세요.";
+      break;
+    case ErrorType.EXCEL_SIZE_LIMIT:
+      errorMessage += `\n\n제안: Excel 파일을 압축하거나 불필요한 시트를 제거하여 ${pdfSizeLimitMB}MB 이하로 만들어주세요.`;
+      break;
+    case ErrorType.EXCEL_PARSE_ERROR:
+      errorMessage += "\n\n제안: Excel 파일이 손상되었거나 지원하지 않는 형식일 수 있습니다. .xlsx 형식으로 저장 후 다시 시도해주세요.";
       break;
   }
   
